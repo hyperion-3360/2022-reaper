@@ -72,12 +72,6 @@ public class DriveTrain extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     m_odometry.update(m_gyro.getRotation2d().unaryMinus(), -getLeftEncoderPositionMeters(), getRightEncoderPositionMeters());
-
-    //m_leftDistanceEntry.setNumber(m_odometry.getPoseMeters().getX());
-    //m_rightDistanceEntry.setNumber(m_odometry.getPoseMeters().getY());
-
-    //m_leftVelEntry.setNumber(getLeftEncoderVelocityMetersPerSec());
-    //m_rightVelEntry.setNumber(getRightEncoderVelocityMetersPerSec());
   }
 
   public Pose2d getPose(){
@@ -106,11 +100,6 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public void setDriveVelocity(double leftSpeed, double rightSpeed){
-
-    //m_leftCmdVelEntry.setNumber(leftSpeed);
-    //m_rightCmdVelEntry.setNumber(rightSpeed);
-
-    
 
     double leftVelTicks = leftSpeed * kDtRatio * 2048 / (kWheelDiam * Math.PI);
     double rightVelTicks = rightSpeed * kDtRatio * 2048 / (kWheelDiam * Math.PI);

@@ -10,9 +10,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
-
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -28,8 +25,6 @@ public class Shooter extends SubsystemBase {
 
   private final double kDst2RPM_m = 10;
   private final double kDst2RPM_b = 1775;
-
-  private NetworkTableEntry reqRPM;
 
   /** Creates a new Shooter. */
   public Shooter() {
@@ -70,11 +65,6 @@ public class Shooter extends SubsystemBase {
 
     shooter1.burnFlash();
     shooter2.burnFlash();
-
-    reqRPM = Shuffleboard
-    .getTab("Shooter Test")
-    .add("RPM command", 0)
-    .getEntry();
   }
 
   //@Override
