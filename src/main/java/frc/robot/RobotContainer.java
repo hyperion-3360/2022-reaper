@@ -98,7 +98,8 @@ public class RobotContainer {
   m_autoChooser.addOption("4 Balls", getAutonomousCommand4Balls());  
   m_autoChooser.addOption("2 Balls", getAutonomousCommand2Balls());
   m_autoChooser.addOption("2 Balls steal", getAutonomousCommand2BallsSteal());
-  //m_autoChooser.addOption("5 Balls", getAutonomousCommand5Balls());
+  m_autoChooser.addOption("5 Balls", getAutonomousCommand5Balls());
+  
   // Put the chooser on the dashboard
   autoChooserList = Shuffleboard
   .getTab("Pilot View")
@@ -309,7 +310,8 @@ public class RobotContainer {
           m_drivetrain);
 
     // An ExampleCommand will run in autonomous
-    return new InstantCommand(m_intake::run)
+    return new InstantCommand(() -> { m_drivetrain.resetOdometry(combo.getInitialPose());})
+      .andThen(new InstantCommand(m_intake::run))
       .andThen(new InstantCommand(m_intake::releaseIntake))
       .andThen(ramseteCommand2)
       .andThen(new InstantCommand(m_intake::stop))
@@ -413,11 +415,11 @@ public class RobotContainer {
       .andThen(new InstantCommand(m_intake::stop));
       //.raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
 
-    m_drivetrain.resetOdometry(getFirstBall.getInitialPose());
     // An ExampleCommand will run in autonomous
     return 
       //move while intaking
-      new InstantCommand(m_intake::run)
+      new InstantCommand(() -> { m_drivetrain.resetOdometry(getFirstBall.getInitialPose()); })
+      .andThen(new InstantCommand(m_intake::run))
       .andThen(new InstantCommand(m_intake::releaseIntake))
       //.andThen(m_shooter::setAutoPreSpin)
       .andThen(Move1)
@@ -541,7 +543,6 @@ public class RobotContainer {
       .andThen(new WaitCommand(1.25))
       .andThen(new InstantCommand(m_shooter::stop))
       .andThen(new InstantCommand(m_intake::stop));
-      //.raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
 
       Command shootSeq2 =
       new InstantCommand(m_intake::runReversed)
@@ -552,7 +553,6 @@ public class RobotContainer {
       .andThen(new WaitCommand(2))
       .andThen(new InstantCommand(m_shooter::stop))
       .andThen(new InstantCommand(m_intake::stop));
-      //.raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
 
       Command shootSeq3 =
       new InstantCommand(m_intake::runReversed)
@@ -564,11 +564,10 @@ public class RobotContainer {
       .andThen(new InstantCommand(m_shooter::stop))
       .andThen(new InstantCommand(m_intake::stop));
 
-    m_drivetrain.resetOdometry(getZeroBall.getInitialPose());
     // An ExampleCommand will run in autonomous
-    return 
+    return new InstantCommand(() -> { m_drivetrain.resetOdometry(getZeroBall.getInitialPose()); })
       //move while intaking
-      new InstantCommand(m_intake::run)
+      .andThen(new InstantCommand(m_intake::run))
       .andThen(new InstantCommand(m_intake::releaseIntake))
       //.andThen(m_shooter::setAutoPreSpin)
       .andThen(Move0)
@@ -684,12 +683,10 @@ public class RobotContainer {
       .andThen(new InstantCommand(m_intake::stop))
       .raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
 
-
-    m_drivetrain.resetOdometry(getFirstBall.getInitialPose());
     // An ExampleCommand will run in autonomous
-    return 
+    return new InstantCommand(() -> { m_drivetrain.resetOdometry(getFirstBall.getInitialPose()); })
       //move while intaking
-      new InstantCommand(m_intake::run)
+      .andThen(new InstantCommand(m_intake::run))
       //.andThen(m_shooter::setAutoPreSpin)
       .andThen(new InstantCommand(m_intake::releaseIntake))
       .andThen(Move1)
@@ -702,7 +699,6 @@ public class RobotContainer {
       .andThen(new InstantCommand(m_intake::run))
       .andThen(Move2)
       .andThen(new WaitCommand(0.01))
-      
 
       //vomit 2 balls in hangar
       .andThen(new InstantCommand(m_shooter::setAutoPreSpin))
