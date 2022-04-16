@@ -86,7 +86,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void setAutoPreSpin(){
-    setSpeed(2000);
+    setSpeed(1200);
   }
     
   

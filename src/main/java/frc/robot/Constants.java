@@ -4,7 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
+import edu.wpi.first.math.trajectory.constraint.DifferentialDriveVoltageConstraint;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -57,6 +60,44 @@ public final class Constants {
 
     public static final double kTrackWidthMeters = 1.5;
 
-    public static final DifferentialDriveKinematics driveKinematics = 
-      new DifferentialDriveKinematics(kTrackWidthMeters);
+    public static final DifferentialDriveKinematics driveKinematics = new DifferentialDriveKinematics(kTrackWidthMeters);
+
+    public static final DifferentialDriveVoltageConstraint autoVoltageConstraint =
+      new DifferentialDriveVoltageConstraint(
+        new SimpleMotorFeedforward(
+          Constants.ksVolts, 
+          Constants.ksVoltsSecondMeters, 
+          Constants.ksVoltsSecondMetersSquared), 
+        Constants.driveKinematics, 
+        9);
+
+    public static final TrajectoryConfig autoConfigSlowForward =
+      new TrajectoryConfig(
+        Constants.kMaxSpeedMetersSecondSlow,
+        Constants.kMaxAccelerationMetersSecondSquaredSlow)
+      .setKinematics(Constants.driveKinematics)
+      .addConstraint(autoVoltageConstraint);
+
+    public static final TrajectoryConfig autoConfigSlowReverse =
+      new TrajectoryConfig(
+        Constants.kMaxSpeedMetersSecondSlow,
+        Constants.kMaxAccelerationMetersSecondSquaredSlow)
+      .setKinematics(Constants.driveKinematics)
+      .addConstraint(autoVoltageConstraint)
+      .setReversed(true);
+
+    public static final TrajectoryConfig autoConfigFastForward =
+    new TrajectoryConfig(
+        Constants.kMaxSpeedMetersSecondFast,
+        Constants.kMaxAccelerationMetersSecondSquaredFast)
+      .setKinematics(Constants.driveKinematics)
+      .addConstraint(autoVoltageConstraint);
+
+    public static final TrajectoryConfig autoConfigFastReverse =
+    new TrajectoryConfig(
+        Constants.kMaxSpeedMetersSecondFast,
+        Constants.kMaxAccelerationMetersSecondSquaredFast)
+      .setKinematics(Constants.driveKinematics)
+      .addConstraint(autoVoltageConstraint)
+      .setReversed(true);
 }

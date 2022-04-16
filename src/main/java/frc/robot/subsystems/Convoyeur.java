@@ -50,6 +50,11 @@ public class Convoyeur extends SubsystemBase {
     convoyeurLock.set(kLockPctRatio * kBeltFeedPct);
   }
 
+  public void feedSlow(){  
+    convoyeurBelt.set(0.75 * kBeltFeedPct);
+    convoyeurLock.set(kLockPctRatio * kBeltFeedPct);
+  }
+
   public double angleCorrection(double turretAngle){
     double d_corr = 0;
     if(turretAngle > 50 || turretAngle < -50)

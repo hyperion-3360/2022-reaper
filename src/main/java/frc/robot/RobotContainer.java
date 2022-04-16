@@ -32,6 +32,8 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 import frc.robot.commands.AutoAlign;
+import frc.robot.commands.Autonomous2Balls;
+import frc.robot.commands.CustomRamsete;
 import frc.robot.commands.GetShooterReady;
 import frc.robot.commands.TeleopDriveArcade;
 import frc.robot.subsystems.Climber;
@@ -91,7 +93,9 @@ public class RobotContainer {
 
   m_autoChooser.setDefaultOption("shit auto", getShitAuto());
   m_autoChooser.addOption("4 Balls", getAutonomousCommand4Balls());  
-  m_autoChooser.addOption("2 Balls", getAutonomousCommand2Balls());
+  m_autoChooser.addOption(
+    "2 Balls",
+    new Autonomous2Balls(m_drivetrain, m_intake, m_shooter, m_turret, m_vision, m_convoyeur));
   m_autoChooser.addOption("2 Balls steal", getAutonomousCommand2BallsSteal());
   m_autoChooser.addOption("5 Balls", getAutonomousCommand5Balls());
   
@@ -185,6 +189,11 @@ public class RobotContainer {
 
     new JoystickButton(m_pilotJoystick, XboxController.Button.kX.value)
       .whenPressed(new InstantCommand(m_intake::retractIntake));
+
+    new JoystickButton(m_pilotJoystick, XboxController.Button.kRightBumper.value)
+      .whileHeld(new RunCommand(() -> {
+          m_drivetrain.setDriveVelocity(0, 0);
+        }, m_drivetrain));
   }
 
   public void resetSensors(){
@@ -252,68 +261,6 @@ public class RobotContainer {
     .andThen(new InstantCommand(m_intake::stop))
     .andThen(shootSeq)
     .raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
-   }
-  public Command getAutonomousCommand2Balls() {
-
-    var autoVoltageConstraint =
-      new DifferentialDriveVoltageConstraint(
-        new SimpleMotorFeedforward(
-          Constants.ksVolts, 
-          Constants.ksVoltsSecondMeters, 
-          Constants.ksVoltsSecondMetersSquared), 
-          Constants.driveKinematics, 
-          9);
-
-    TrajectoryConfig configForward =
-      new TrajectoryConfig(
-        Constants.kMaxSpeedMetersSecondSlow,
-        Constants.kMaxAccelerationMetersSecondSquaredSlow)
-        .setKinematics(Constants.driveKinematics)
-        .addConstraint(autoVoltageConstraint);
-
-        TrajectoryConfig configReverse =
-        new TrajectoryConfig(
-          Constants.kMaxSpeedMetersSecondSlow,
-          Constants.kMaxAccelerationMetersSecondSquaredSlow)
-          .setKinematics(Constants.driveKinematics)
-          .addConstraint(autoVoltageConstraint)
-          .setReversed(true);
-
-    Trajectory exampleTrajectory1 =
-      TrajectoryGenerator.generateTrajectory(
-        new Pose2d(0,0,new Rotation2d(0)),
-        List.of(),
-        new Pose2d(2,0,new Rotation2d(Math.toRadians(0))),
-        configForward);
-
-    Trajectory exampleTrajectory2 =
-      TrajectoryGenerator.generateTrajectory(
-        new Pose2d(2,0, new Rotation2d(0)),
-        List.of(),
-        new Pose2d(1.5,0,new Rotation2d(0)),
-        configReverse);
-
-    Trajectory combo = exampleTrajectory1.concatenate(exampleTrajectory2);
-
-    RamseteCommand ramseteCommand2 = 
-      new RamseteCommand(
-          combo,
-          m_drivetrain::getPose,
-          new RamseteController(),
-          Constants.driveKinematics,
-          m_drivetrain::setDriveVelocity,
-          m_drivetrain);
-
-    // An ExampleCommand will run in autonomous
-    return new InstantCommand(() -> { m_drivetrain.resetOdometry(combo.getInitialPose());})
-      .andThen(new InstantCommand(m_intake::run))
-      .andThen(new InstantCommand(m_intake::releaseIntake))
-      .andThen(ramseteCommand2)
-      .andThen(new InstantCommand(m_intake::stop))
-      .andThen((new GetShooterReady(m_shooter, m_turret, m_vision))
-      .andThen(new WaitCommand(3)
-      .andThen(new RunCommand(m_convoyeur::feed))))
-      .raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
   }
 
   public Command getAutonomousCommand4Balls() {
@@ -595,96 +542,59 @@ public class RobotContainer {
 
   public Command getAutonomousCommand2BallsSteal() {
 
-    var autoVoltageConstraint =
-      new DifferentialDriveVoltageConstraint(
-        new SimpleMotorFeedforward(
-          Constants.ksVolts, 
-          Constants.ksVoltsSecondMeters, 
-          Constants.ksVoltsSecondMetersSquared), 
-          Constants.driveKinematics, 
-          10);
-
-  TrajectoryConfig configForward =
-    new TrajectoryConfig(
-        Constants.kMaxSpeedMetersSecondFast,
-        Constants.kMaxAccelerationMetersSecondSquaredFast)
-      .setKinematics(Constants.driveKinematics)
-      .addConstraint(autoVoltageConstraint);
-
-    TrajectoryConfig configReverse =
-      new TrajectoryConfig(
-        Constants.kMaxSpeedMetersSecondFast,
-        Constants.kMaxAccelerationMetersSecondSquaredFast)
-      .setKinematics(Constants.driveKinematics)
-      .addConstraint(autoVoltageConstraint)
-      .setReversed(true);
-
     Trajectory getFirstBall =
       TrajectoryGenerator.generateTrajectory(
         new Pose2d(0,0,new Rotation2d(Math.toRadians(0))),
         List.of(),
         new Pose2d(1.5, -0.2,new Rotation2d(Math.toRadians(-10))),
-        configForward);
+        Constants.autoConfigFastForward);
 
     Trajectory firstReverse =
       TrajectoryGenerator.generateTrajectory(
         new Pose2d(1.5,-0.2,new Rotation2d(Math.toRadians(-10))),
         List.of(),
         new Pose2d(0, -0.5,new Rotation2d(Math.toRadians(-10))),
-        configReverse);
+        Constants.autoConfigFastReverse);
     
     Trajectory getFirstOppBall =
       TrajectoryGenerator.generateTrajectory(
         new Pose2d(0,-0.5,new Rotation2d(Math.toRadians(-10))),
         List.of(),
-        new Pose2d(1, -1.2,new Rotation2d(Math.toRadians(-20))),
-        configForward);
+        new Pose2d(1, -1.1,new Rotation2d(Math.toRadians(-20))),
+        Constants.autoConfigFastForward);
 
     Trajectory getSecondOppBall =
       TrajectoryGenerator.generateTrajectory(
-        new Pose2d(1,-1.2, new Rotation2d(Math.toRadians(-20))),
+        new Pose2d(1,-1.1, new Rotation2d(Math.toRadians(-20))),
         List.of(),
-        new Pose2d(0.3,3,new Rotation2d(Math.toRadians(145))),
-        configForward);
+        new Pose2d(-0.05,2.7,new Rotation2d(Math.toRadians(145))),
+        Constants.autoConfigFastForward);
 
+    Trajectory returnHomeSide = 
+      TrajectoryGenerator.generateTrajectory(
+        new Pose2d(-0.05,2.7,new Rotation2d(Math.toRadians(145))),
+        List.of(), 
+        new Pose2d(2.2,2.7,new Rotation2d(Math.toRadians(130))),
+        Constants.autoConfigFastReverse);
 
     Trajectory ballStealing = firstReverse.concatenate(getFirstOppBall.concatenate(getSecondOppBall));
-
-    RamseteCommand Move1 = 
-      new RamseteCommand(
-          getFirstBall,
-          m_drivetrain::getPose,
-          new RamseteController(),
-          Constants.driveKinematics,
-          m_drivetrain::setDriveVelocity);
-
-    RamseteCommand Move2 = 
-      new RamseteCommand(
-          ballStealing,
-          m_drivetrain::getPose,
-          new RamseteController(),
-          Constants.driveKinematics,
-          m_drivetrain::setDriveVelocity);
-    
 
      Command shootSeq =
       new InstantCommand(m_intake::runReversed)
       .andThen(new WaitCommand(0.1))
       .andThen(new InstantCommand(m_intake::stop))
-      .andThen(new WaitCommand(0.5))
+      .andThen(new WaitCommand(1.0))
       .andThen(new InstantCommand(m_convoyeur::feed))
       .andThen(new WaitCommand(1.75))
       .andThen(new InstantCommand(m_shooter::stop))
       .andThen(new InstantCommand(m_intake::stop))
       .raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
 
-    // An ExampleCommand will run in autonomous
     return new InstantCommand(() -> { m_drivetrain.resetOdometry(getFirstBall.getInitialPose()); })
       //move while intaking
       .andThen(new InstantCommand(m_intake::run))
-      //.andThen(m_shooter::setAutoPreSpin)
       .andThen(new InstantCommand(m_intake::releaseIntake))
-      .andThen(Move1)
+      .andThen(new CustomRamsete(m_drivetrain, getFirstBall))
       .andThen(new InstantCommand(m_intake::stop))
 
       //shoot sequence
@@ -692,18 +602,16 @@ public class RobotContainer {
 
       //move to steal 2 balls while intaking
       .andThen(new InstantCommand(m_intake::run))
-      .andThen(Move2)
+      .andThen(new CustomRamsete(m_drivetrain, ballStealing))
       .andThen(new WaitCommand(0.01))
 
       //vomit 2 balls in hangar
       .andThen(new InstantCommand(m_shooter::setAutoPreSpin))
-      .andThen(new WaitCommand(0.25))
-      .andThen(new InstantCommand(m_convoyeur::feed))
+      .andThen(new CustomRamsete(m_drivetrain, returnHomeSide))
+      .andThen(new InstantCommand(m_convoyeur::feedSlow))
       .andThen(new WaitCommand(1.5))
       .andThen(new InstantCommand(m_intake::stop))
       .andThen(new InstantCommand(m_shooter::stop));
-      
-      
   }
 
   public static Joystick getPilotJoystick(){
