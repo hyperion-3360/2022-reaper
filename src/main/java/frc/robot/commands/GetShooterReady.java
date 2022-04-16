@@ -44,7 +44,7 @@ public class GetShooterReady extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    //m_turret.aim(m_vision.getTv(), m_vision.getTx());
+    m_turret.aim(m_vision.getTv(), m_vision.getTx());
     m_shooter.setSpeedFromDistance(m_vision.getDistance());
   }
 

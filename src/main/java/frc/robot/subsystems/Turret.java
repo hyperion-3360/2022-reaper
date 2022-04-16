@@ -26,8 +26,8 @@ import frc.robot.RobotContainer;
 public class Turret extends SubsystemBase {
 
   //-------DO NOT CHAMGE THESE VALUES, THEY ARE THE TURRET'S LIMITS---------////
-  private double minAngle = -290/5; //turret minimum angle in encoder ticks
-  private double maxAngle = 100/5;  //turret maximum angle in encoder ticks
+  private double minAngle = 0; //turret minimum angle in encoder ticks
+  private double maxAngle = 70;  //turret maximum angle in encoder ticks
   
   private double softZoneSize = 10;
 
@@ -35,7 +35,7 @@ public class Turret extends SubsystemBase {
 
   private double center = 0;
 
-  private double climbAngle = -280/5;
+  private double climbAngle = 0;
 
   private CANSparkMax turretTurner; //the motor
   private ColorSensorV3 colorSensor; //the color sensor
@@ -49,7 +49,7 @@ public class Turret extends SubsystemBase {
   private double redThreshold = 0.2;
   private double blueThreshold = 0.2;
 
-  private NetworkTableEntry turretCurrent;
+  private final NetworkTableEntry m_turretAngle;
 
   /** Creates a new Turret. */
   public Turret() {
@@ -58,25 +58,19 @@ public class Turret extends SubsystemBase {
     turretTurner.setIdleMode(IdleMode.kBrake);
     turretTurner.setOpenLoopRampRate(0.125);
 
-    turretCurrent = Shuffleboard
-      .getTab("Shooter Test")
-      .add("turretCurrent", 0)
-      .getEntry();
-
     colorSensor = new ColorSensorV3(Port.kMXP);
     colorSensor.configureColorSensor(ColorSensorResolution.kColorSensorRes20bit, 
                                      ColorSensorMeasurementRate.kColorRate2000ms, 
                                      GainFactor.kGain3x);
     alliance = DriverStation.getAlliance();
+
+    m_turretAngle = Shuffleboard.getTab("Debug").add("Turrent Angle", 0.0).getEntry();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    
-    //System.out.println(turretTurner.getEncoder().getPosition() + "encoder pos");
-    //System.out.println(m_vision.getTv() + "vision TV");
-    turretCurrent.setDouble(turretTurner.getOutputCurrent());
+    m_turretAngle.setDouble(turretTurner.getEncoder().getPosition());
   }
 
   public boolean minAngleReached(){
