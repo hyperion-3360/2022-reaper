@@ -78,7 +78,7 @@ public class Vision extends SubsystemBase {
     if(getTv()==1){
       return (100-39) / Math.tan(Math.toRadians(21.3 + getTy()));
     }else{
-      return 120;
+      return 80;
     }
     
   }

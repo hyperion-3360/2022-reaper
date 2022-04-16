@@ -5,8 +5,6 @@
 package frc.robot.subsystems;
 
 import frc.robot.Constants;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxRelativeEncoder;
@@ -29,8 +27,6 @@ public class Intake extends SubsystemBase {
 
   public boolean intakeRequest = false;
 
-  private final NetworkTableEntry m_intakePos;
-
 
   /** Creates a new Intake. */
   public Intake(Convoyeur convoyeur) {
@@ -40,18 +36,12 @@ public class Intake extends SubsystemBase {
     intakeWinch = new CANSparkMax(Constants.id_intakeWinch, MotorType.kBrushed);
     m_encoder = intakeWinch.getEncoder(SparkMaxRelativeEncoder.Type.kQuadrature, 8192);
     m_encoder.setInverted(true);
-
-    var intakeTrainTab = Shuffleboard.getTab("Intake");
-    m_intakePos = intakeTrainTab.add("position", 0).getEntry();
-
   }
 
   @Override
   public void periodic() {
-    m_intakePos.setNumber(getWinchPos());
     // This method will be called once per scheduler run
   }
-
 
   //intakes ballons
   public void run() {

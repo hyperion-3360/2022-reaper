@@ -10,7 +10,9 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants;
@@ -23,21 +25,24 @@ public class Shooter extends SubsystemBase {
   private SparkMaxPIDController m_pidShooter;
   public double dashRPM, kP, kI, kD, kIz, kFF, kS, kMaxOutput, kMinOutput, maxRPM, lastSetpoint, vNom;
 
-  private final double kDst2RPM_m = 10;
-  private final double kDst2RPM_b = 1775;
+  private final double kDst2RPM_m = 11;
+  private final double kDst2RPM_b = 1760;
+
+  private final NetworkTableEntry m_entryShooterRPM;
+  private final NetworkTableEntry m_entryShooterRPMcmd;
 
   /** Creates a new Shooter. */
   public Shooter() {
-    kP = 0.00005; 
-    kI = 0.0;
-    kIz = 0.0;
+    kP = 0.00004; 
+    kI = 0.00000004;
+    kIz = 200.0;
     kD = 0.0; 
     kS = 0.0165195;
     kFF = 0.000223861;
     vNom = 10.0;
 
-    kMaxOutput = -1; 
-    kMinOutput = 1;
+    kMaxOutput = 1; 
+    kMinOutput = -1;
 
     maxRPM = 5500;
     dashRPM = 5000;
@@ -59,23 +64,25 @@ public class Shooter extends SubsystemBase {
     m_pidShooter.setP(kP);
     m_pidShooter.setI(kI);
     m_pidShooter.setD(kD);
-    //m_pidShooter.setIZone(kIz);
+    m_pidShooter.setIZone(kIz);
     m_pidShooter.setFF(kFF);
     m_pidShooter.setOutputRange(kMinOutput, kMaxOutput);
 
     shooter1.burnFlash();
     shooter2.burnFlash();
+
+    m_entryShooterRPM = Shuffleboard.getTab("Debug").add("Shooter RPM", 0.0).getEntry();
+    m_entryShooterRPMcmd = Shuffleboard.getTab("Debug").add("Shooter RPM cmd", 0.0).getEntry();
   }
 
   //@Override
   public void periodic() {
-    SmartDashboard.putNumber("SHTrpm", shooter1.getEncoder().getVelocity());
+    m_entryShooterRPM.setDouble(shooter1.getEncoder().getVelocity());
   }
 
   public void setSpeed(double rpm){
-    m_pidShooter.setReference(-rpm, ControlType.kVelocity, 0, Math.signum(-rpm) * kS, ArbFFUnits.kPercentOut);
-    SmartDashboard.putNumber("SHTrpm_cmd", rpm);
-    
+    m_pidShooter.setReference(rpm, ControlType.kVelocity, 0, Math.signum(rpm) * kS, ArbFFUnits.kPercentOut);
+    m_entryShooterRPMcmd.setDouble(rpm);
   }
 
   public void setAutoPreSpin(){

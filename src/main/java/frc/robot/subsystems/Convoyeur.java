@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import javax.lang.model.util.ElementScanner6;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
@@ -27,9 +29,12 @@ public class Convoyeur extends SubsystemBase {
   private double latestCurrent;
   private double currentDelta = 0;
 
+  private static final double kBeltFeedPct = 0.5;
+  private static final double kLockPctRatio = -0.75;
+
   private Turret m_turret;
 
-  private NetworkTableEntry lockOffset;
+  private NetworkTableEntry m_entryAngleCorr;
 
   /** Creates a new Convoyeur. */
   public Convoyeur(Turret turret) {
@@ -41,18 +46,15 @@ public class Convoyeur extends SubsystemBase {
     filter = LinearFilter.singlePoleIIR(0.1, 0.02);
     m_turret = turret;
 
-    lockOffset = Shuffleboard
-      .getTab("Shooter Test")
-      .add("lockSpeed", 0)
+    m_entryAngleCorr = Shuffleboard
+      .getTab("Debug")
+      .add("Angle Correction", 0)
       .getEntry();
-
   }
 
   @Override
   public void periodic() {
-    //filters the current values from the convoyeruLock to get the average
-
-    lockOffset.setDouble(-0.1+angleCorrection(m_turret.getTurretAngle()));
+    
   }
 
   public void ActivateConvoyeur(){
@@ -62,13 +64,28 @@ public class Convoyeur extends SubsystemBase {
 
   //feeds ballon regardless of the number
   public void feed(){  
+
     /*
-    convoyeurBelt.set(0.45);
-    convoyeurLock.set(-0.39);//+angleCorrection(m_turret.getTurretAngle())); 
+    * Correct for the fact that the ball engage faster when the turrent and the conveyer are aligned.
     */
-    double corr= angleCorrection(m_turret.getTurretAngle());
-    convoyeurBelt.set(0.32 - (corr/1.75));
-    convoyeurLock.set(-0.16 + corr);
+    double angle = m_turret.getTurretAngle();
+    double angleFromSide;
+    if (angle > 28.8) {
+      angleFromSide = angle - 28.8;
+      if (angleFromSide > 90) {
+        angleFromSide = 180 - angleFromSide;
+      }
+    }
+    else {
+      angleFromSide = Math.max(28.8 - angle, 0.0);
+    }
+    double corr = -0.3 * (angleFromSide / 28.8);
+
+    //double corr= angleCorrection(m_turret.getTurretAngle());
+    //double corr = m_entryAngleCorr.getDouble(0.0);
+    m_entryAngleCorr.setDouble(corr);
+    convoyeurBelt.set(kBeltFeedPct + corr);
+    convoyeurLock.set(kLockPctRatio * kBeltFeedPct + corr);
   }
 
   public double angleCorrection(double turretAngle){
