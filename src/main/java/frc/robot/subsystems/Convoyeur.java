@@ -4,19 +4,11 @@
 
 package frc.robot.subsystems;
 
-import javax.lang.model.util.ElementScanner6;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import frc.robot.Constants;
-
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-
 
 public class Convoyeur extends SubsystemBase {
 
@@ -32,10 +24,6 @@ public class Convoyeur extends SubsystemBase {
   private static final double kBeltFeedPct = 0.5;
   private static final double kLockPctRatio = -0.75;
 
-  private Turret m_turret;
-
-  private NetworkTableEntry m_entryAngleCorr;
-
   /** Creates a new Convoyeur. */
   public Convoyeur(Turret turret) {
     //motors
@@ -44,12 +32,6 @@ public class Convoyeur extends SubsystemBase {
 
     //filter to filter the current drawn by the convoyeurLock
     filter = LinearFilter.singlePoleIIR(0.1, 0.02);
-    m_turret = turret;
-
-    m_entryAngleCorr = Shuffleboard
-      .getTab("Debug")
-      .add("Angle Correction", 0)
-      .getEntry();
   }
 
   @Override
@@ -64,28 +46,8 @@ public class Convoyeur extends SubsystemBase {
 
   //feeds ballon regardless of the number
   public void feed(){  
-
-    /*
-    * Correct for the fact that the ball engage faster when the turrent and the conveyer are aligned.
-    */
-    double angle = m_turret.getTurretAngle();
-    double angleFromSide;
-    if (angle > 28.8) {
-      angleFromSide = angle - 28.8;
-      if (angleFromSide > 90) {
-        angleFromSide = 180 - angleFromSide;
-      }
-    }
-    else {
-      angleFromSide = Math.max(28.8 - angle, 0.0);
-    }
-    double corr = -0.3 * (angleFromSide / 28.8);
-
-    //double corr= angleCorrection(m_turret.getTurretAngle());
-    //double corr = m_entryAngleCorr.getDouble(0.0);
-    m_entryAngleCorr.setDouble(corr);
-    convoyeurBelt.set(kBeltFeedPct + corr);
-    convoyeurLock.set(kLockPctRatio * kBeltFeedPct + corr);
+    convoyeurBelt.set(kBeltFeedPct);
+    convoyeurLock.set(kLockPctRatio * kBeltFeedPct);
   }
 
   public double angleCorrection(double turretAngle){

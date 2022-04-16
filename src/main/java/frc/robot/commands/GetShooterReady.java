@@ -45,7 +45,8 @@ public class GetShooterReady extends CommandBase {
   @Override
   public void execute() {
     m_turret.aim(m_vision.getTv(), m_vision.getTx());
-    m_shooter.setSpeedFromDistance(m_vision.getDistance());
+
+    m_shooter.setSpeedFromDistance(m_vision.getDistance(), m_turret.getAngleFromSide());
   }
 
   // Called once the command ends or is interrupted.

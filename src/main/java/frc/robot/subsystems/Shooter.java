@@ -94,13 +94,15 @@ public class Shooter extends SubsystemBase {
   /**
    * Set the shooter RPM based on the distance to the target
    * @param distance distance to target (inches)
+   * @param offsetFromSide turret angle offset from lateral (encoder ticks)
    */
-  public void setSpeedFromDistance(double distanceInches){
+  public void setSpeedFromDistance(double distanceInches, double offsetFromSide){
     double d_speed = (distanceInches * kDst2RPM_m) + kDst2RPM_b;
     lastSetpoint = d_speed;
     d_speed = Math.abs(d_speed);
+
+    d_speed = d_speed - (offsetFromSide / 28.8) * 80;
     setSpeed(d_speed);
-    //setSpeed(reqRPM.getDouble(2000.0));
   }
 
   public void setShooterVoltage(double input){
@@ -143,6 +145,5 @@ public class Shooter extends SubsystemBase {
 
   public void stop() {
     shooter1.set(0);
-
   }
 }

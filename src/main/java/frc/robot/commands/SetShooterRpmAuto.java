@@ -11,12 +11,14 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.Vision;
 
 public class SetShooterRpmAuto extends CommandBase {
   private final Shooter m_shooter;
   private final Joystick m_joystick;
   private final Vision m_vision;
+  private final Turret m_turret;
 
   /**
    * Sets the shooter RPM based on the measured distance to the target.
@@ -24,10 +26,11 @@ public class SetShooterRpmAuto extends CommandBase {
    * @param joystick Joystick subsystem instance.
    * @param vision Vision subsytem instance.
    */
-  public SetShooterRpmAuto(Shooter shooter, Joystick joystick, Vision vision) {
+  public SetShooterRpmAuto(Shooter shooter, Joystick joystick, Vision vision, Turret turret) {
     m_shooter = shooter;
     m_joystick = joystick;
     m_vision = vision;
+    m_turret = turret;
 
     addRequirements(m_shooter);
   }
@@ -40,7 +43,7 @@ public class SetShooterRpmAuto extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_shooter.setSpeedFromDistance(m_vision.getDistance());
+    m_shooter.setSpeedFromDistance(m_vision.getDistance(), m_turret.getAngleFromSide());
     m_joystick.setRumble(RumbleType.kLeftRumble, 0.5);
     
     if (m_shooter.isAtSpeed()) {

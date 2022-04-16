@@ -229,4 +229,19 @@ public class Turret extends SubsystemBase {
     else aimWithValue(Tx - rejectOffset);
   }
 
+  public double getAngleFromSide() {
+    double angle = getTurretAngle();
+    double angleFromSide;
+    if (angle > 28.8) {
+      angleFromSide = angle - 28.8;
+      if (angleFromSide > 28.8) {
+        angleFromSide = (2 * 28.8) - angleFromSide;
+      }
+    }
+    else {
+      angleFromSide = Math.max(28.8 - angle, 0.0);
+    }
+    return angleFromSide;
+  }
+
 }
