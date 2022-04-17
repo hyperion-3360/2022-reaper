@@ -27,7 +27,7 @@ public class Turret extends SubsystemBase {
 
   //-------DO NOT CHAMGE THESE VALUES, THEY ARE THE TURRET'S LIMITS---------////
   private double minAngle = 0; //turret minimum angle in encoder ticks
-  private double maxAngle = 70;  //turret maximum angle in encoder ticks
+  private double maxAngle = 55;  //turret maximum angle in encoder ticks
   
   private double softZoneSize = 10;
 

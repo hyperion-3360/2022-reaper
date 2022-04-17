@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.Autonomous2Balls;
+import frc.robot.commands.AutonomousStealOne;
 import frc.robot.commands.CustomRamsete;
 import frc.robot.commands.GetShooterReady;
 import frc.robot.commands.TeleopDriveArcade;
@@ -97,6 +98,9 @@ public class RobotContainer {
     "2 Balls",
     new Autonomous2Balls(m_drivetrain, m_intake, m_shooter, m_turret, m_vision, m_convoyeur));
   m_autoChooser.addOption("2 Balls steal", getAutonomousCommand2BallsSteal());
+  m_autoChooser.addOption(
+    "1 Ball Steal",
+    new AutonomousStealOne(m_intake, m_convoyeur, m_drivetrain, m_shooter, m_turret, m_vision));
   m_autoChooser.addOption("5 Balls", getAutonomousCommand5Balls());
   
   // Put the chooser on the dashboard
@@ -104,8 +108,6 @@ public class RobotContainer {
   .getTab("Pilot View")
   .add(m_autoChooser)
   .withWidget(BuiltInWidgets.kComboBoxChooser);
-  
-  //SmartDashboard.putData(m_autoChooser);
   }
 
   public void configureDefaultCommands(){
@@ -265,75 +267,26 @@ public class RobotContainer {
 
   public Command getAutonomousCommand4Balls() {
 
-    var autoVoltageConstraint =
-      new DifferentialDriveVoltageConstraint(
-        new SimpleMotorFeedforward(
-          Constants.ksVolts, 
-          Constants.ksVoltsSecondMeters, 
-          Constants.ksVoltsSecondMetersSquared), 
-          Constants.driveKinematics, 
-          9);
-
-  TrajectoryConfig configForward =
-    new TrajectoryConfig(
-        Constants.kMaxSpeedMetersSecondSlow,
-        Constants.kMaxAccelerationMetersSecondSquaredSlow)
-      .setKinematics(Constants.driveKinematics)
-      .addConstraint(autoVoltageConstraint);
-
-    TrajectoryConfig configReverse =
-      new TrajectoryConfig(
-        Constants.kMaxSpeedMetersSecondSlow,
-        Constants.kMaxAccelerationMetersSecondSquaredSlow)
-      .setKinematics(Constants.driveKinematics)
-      .addConstraint(autoVoltageConstraint)
-      .setReversed(true);
-
     Trajectory getFirstBall =
       TrajectoryGenerator.generateTrajectory(
         new Pose2d(0,0,new Rotation2d(Math.toRadians(0))),
         List.of(),
         new Pose2d(1.5, 0.2,new Rotation2d(Math.toRadians(10))),
-        configForward);
+        Constants.autoConfigSlowForward);
 
     Trajectory getBallsFeeder =
       TrajectoryGenerator.generateTrajectory(
         new Pose2d(1.5,0.2,new Rotation2d(Math.toRadians(10))),
         List.of(),
-        new Pose2d(4.7, -0.70,new Rotation2d(Math.toRadians(30))),
-        configForward);
+        new Pose2d(5, -0.70,new Rotation2d(Math.toRadians(30))),
+        Constants.autoConfigSlowForward);
 
     Trajectory goShoot =
       TrajectoryGenerator.generateTrajectory(
-        new Pose2d(4.70,-0.70, new Rotation2d(Math.toRadians(30))),
+        new Pose2d(5,-0.70, new Rotation2d(Math.toRadians(30))),
         List.of(),
         new Pose2d(1.5,0,new Rotation2d(Math.toRadians(-10))),
-        configReverse);
-
-    RamseteCommand Move1 = 
-      new RamseteCommand(
-          getFirstBall,
-          m_drivetrain::getPose,
-          new RamseteController(),
-          Constants.driveKinematics,
-          m_drivetrain::setDriveVelocity);
-
-    RamseteCommand Move2 = 
-      new RamseteCommand(
-          getBallsFeeder,
-          m_drivetrain::getPose,
-          new RamseteController(),
-          Constants.driveKinematics,
-          m_drivetrain::setDriveVelocity);
-    
-
-    RamseteCommand Move3 = 
-      new RamseteCommand(
-          goShoot,
-          m_drivetrain::getPose,
-          new RamseteController(),
-          Constants.driveKinematics,
-          m_drivetrain::setDriveVelocity);
+        Constants.autoConfigSlowReverse);
 
      Command shootSeq =
       new InstantCommand(m_intake::runReversed)
@@ -344,7 +297,6 @@ public class RobotContainer {
       .andThen(new WaitCommand(1.25))
       .andThen(new InstantCommand(m_shooter::stop))
       .andThen(new InstantCommand(m_intake::stop));
-      //.raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
 
       Command shootSeq2 =
       new InstantCommand(m_intake::runReversed)
@@ -355,16 +307,13 @@ public class RobotContainer {
       .andThen(new WaitCommand(2))
       .andThen(new InstantCommand(m_shooter::stop))
       .andThen(new InstantCommand(m_intake::stop));
-      //.raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
 
-    // An ExampleCommand will run in autonomous
     return 
       //move while intaking
       new InstantCommand(() -> { m_drivetrain.resetOdometry(getFirstBall.getInitialPose()); })
       .andThen(new InstantCommand(m_intake::run))
       .andThen(new InstantCommand(m_intake::releaseIntake))
-      //.andThen(m_shooter::setAutoPreSpin)
-      .andThen(Move1)
+      .andThen(new CustomRamsete(m_drivetrain, getFirstBall))
       .andThen(new InstantCommand(m_intake::stop))
 
       //shoot sequence
@@ -372,20 +321,16 @@ public class RobotContainer {
 
       //move to feeder while intaking
       .andThen(new InstantCommand(m_intake::run))
-      .andThen(Move2)
+      .andThen(new CustomRamsete(m_drivetrain, getBallsFeeder))
       .andThen(new WaitCommand(0.01))
 
       //go to shooting position
-      //.andThen(m_shooter::setAutoPreSpin)
-      .andThen(Move3)
+      .andThen(new CustomRamsete(m_drivetrain, goShoot))
       .andThen(new InstantCommand(m_intake::stop))
       
       //shoot sequence
       .andThen(shootSeq2)
       .raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
-      
-
-      
   }
 
   public Command getAutonomousCommand5Balls() {
@@ -587,25 +532,26 @@ public class RobotContainer {
       .andThen(new InstantCommand(m_convoyeur::feed))
       .andThen(new WaitCommand(1.75))
       .andThen(new InstantCommand(m_shooter::stop))
-      .andThen(new InstantCommand(m_intake::stop))
-      .raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
+      .andThen(new InstantCommand(m_intake::stop));
 
-    return new InstantCommand(() -> { m_drivetrain.resetOdometry(getFirstBall.getInitialPose()); })
-      //move while intaking
-      .andThen(new InstantCommand(m_intake::run))
+    Command firstPickSeq = 
+      new InstantCommand(m_intake::run)
       .andThen(new InstantCommand(m_intake::releaseIntake))
       .andThen(new CustomRamsete(m_drivetrain, getFirstBall))
       .andThen(new InstantCommand(m_intake::stop))
-
-      //shoot sequence
       .andThen(shootSeq)
+      .raceWith(new GetShooterReady(m_shooter, m_turret, m_vision));
 
-      //move to steal 2 balls while intaking
+    return new InstantCommand(() -> { m_drivetrain.resetOdometry(getFirstBall.getInitialPose()); })
+      // pickup first own ball then shoot two
+      .andThen(firstPickSeq)
+
+      // move to steal 2 balls while intaking
       .andThen(new InstantCommand(m_intake::run))
       .andThen(new CustomRamsete(m_drivetrain, ballStealing))
       .andThen(new WaitCommand(0.01))
 
-      //vomit 2 balls in hangar
+      // vomit 2 balls in hangar
       .andThen(new InstantCommand(m_shooter::setAutoPreSpin))
       .andThen(new CustomRamsete(m_drivetrain, returnHomeSide))
       .andThen(new InstantCommand(m_convoyeur::feedSlow))

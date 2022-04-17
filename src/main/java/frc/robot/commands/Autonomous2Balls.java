@@ -24,21 +24,28 @@ import frc.robot.subsystems.Vision;
 
 public class Autonomous2Balls extends SequentialCommandGroup {
 
-  private final Trajectory firstTraj = TrajectoryGenerator.generateTrajectory(
-    new Pose2d(0,0,new Rotation2d(0)),
-    List.of(),
-    new Pose2d(2,0,new Rotation2d(Math.toRadians(0))),
-    Constants.autoConfigSlowForward);
-
-  private final Trajectory secondTraj = TrajectoryGenerator.generateTrajectory(
-    new Pose2d(2,0, new Rotation2d(0)),
-    List.of(),
-    new Pose2d(1.5,0,new Rotation2d(0)),
-    Constants.autoConfigSlowReverse);
-
-  private final Trajectory fullTraj = firstTraj.concatenate(secondTraj);
-
-  public Autonomous2Balls(DriveTrain driveTrain, Intake intake, Shooter shooter, Turret turret, Vision vision, Convoyeur convoyeur) {
+  public Autonomous2Balls(
+    DriveTrain driveTrain,
+    Intake intake,
+    Shooter shooter,
+    Turret turret,
+    Vision vision,
+    Convoyeur convoyeur) {
+    
+    Trajectory firstTraj = TrajectoryGenerator.generateTrajectory(
+      new Pose2d(0,0,new Rotation2d(0)),
+      List.of(),
+      new Pose2d(2,0,new Rotation2d(Math.toRadians(0))),
+      Constants.autoConfigSlowForward);
+  
+    Trajectory secondTraj = TrajectoryGenerator.generateTrajectory(
+      new Pose2d(2,0, new Rotation2d(0)),
+      List.of(),
+      new Pose2d(1.5,0,new Rotation2d(0)),
+      Constants.autoConfigSlowReverse);
+  
+    Trajectory fullTraj = firstTraj.concatenate(secondTraj);
+    
     addCommands(
       race(
         sequence(
