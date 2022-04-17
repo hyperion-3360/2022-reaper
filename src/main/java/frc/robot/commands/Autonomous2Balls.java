@@ -47,9 +47,9 @@ public class Autonomous2Balls extends SequentialCommandGroup {
     Trajectory fullTraj = firstTraj.concatenate(secondTraj);
     
     addCommands(
+      new InstantCommand(() -> { driveTrain.resetOdometry(fullTraj.getInitialPose());}),
       race(
         sequence(
-          new InstantCommand(() -> { driveTrain.resetOdometry(fullTraj.getInitialPose());}),
           new InstantCommand(intake::run),
           new InstantCommand(intake::releaseIntake),
           new CustomRamsete(driveTrain, fullTraj),
