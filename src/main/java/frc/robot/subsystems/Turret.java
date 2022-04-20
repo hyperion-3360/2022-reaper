@@ -27,7 +27,8 @@ public class Turret extends SubsystemBase {
 
   //-------DO NOT CHAMGE THESE VALUES, THEY ARE THE TURRET'S LIMITS---------////
   private double minAngle = 0; //turret minimum angle in encoder ticks
-  private double maxAngle = 55;  //turret maximum angle in encoder ticks
+  private double scanMinAngle = 18;
+  private double maxAngle = 93;  //turret maximum angle in encoder ticks
   
   private double softZoneSize = 10;
 
@@ -81,7 +82,7 @@ public class Turret extends SubsystemBase {
   }
 
   public void aimManual(){
-    aim(1, 40*RobotContainer.getCopilotJoystick().getRawAxis(4));
+    aim(1, 40*RobotContainer.getCopilotJoystick().getRawAxis(4), true);
   }
 
   /**
@@ -89,7 +90,14 @@ public class Turret extends SubsystemBase {
    * @param tv target is valid (1)
    * @param tx target horizontal angle position in frame (-29 to 29 deg)
    */
-  public void aim(double tv, double tx){
+  public void aim(double tv, double tx, boolean override){
+    double d_minAngle;
+    if(override){
+      d_minAngle = minAngle;
+    }
+    else{
+      d_minAngle = scanMinAngle;
+    }
 
     //if the limelight detects a valid target
     if(tv == 1){
@@ -107,9 +115,9 @@ public class Turret extends SubsystemBase {
 
     //if the turret's angle is greater than it's lower limit and 
     //in the rotation speed is negative
-    if((getTurretAngle() > minAngle && rotationSpeed < 0)){
+    if((getTurretAngle() > d_minAngle && rotationSpeed < 0)){
 
-      if(getTurretAngle() < (minAngle + softZoneSize)){
+      if(getTurretAngle() < (d_minAngle + softZoneSize)){
         rotationSpeed = rotationSpeed/5;
       }
 
@@ -149,7 +157,7 @@ public class Turret extends SubsystemBase {
 
     double angleOffset = 0;
     angleOffset = (getTurretAngle() - angle)*6;
-    aim(1, angleOffset);
+    aim(1, angleOffset, true);
   }
 
   /**
@@ -223,7 +231,7 @@ public class Turret extends SubsystemBase {
 
     //if the alliance is the right one the turret aim normally
     if(tempAlliance == alliance)
-      aim(Tv, Tx);
+      aim(Tv, Tx, false);
 
     //otherwise it aims with an offset to not shoot in the goal
     else aimWithValue(Tx - rejectOffset);

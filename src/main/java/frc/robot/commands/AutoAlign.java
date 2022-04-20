@@ -33,7 +33,7 @@ public class AutoAlign extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_turret.aim(m_vision.getTv(), m_vision.getTx());
+    m_turret.aim(m_vision.getTv(), m_vision.getTx(), false);
   }
 
   // Called once the command ends or is interrupted.

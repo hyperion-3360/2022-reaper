@@ -48,7 +48,7 @@ public class ShooterSequence extends CommandBase {
   public void execute() { 
     switch(m_currentState){
       case aim:
-        m_turret.aim(m_vision.getTv(), m_vision.getTx());
+        m_turret.aim(m_vision.getTv(), m_vision.getTx(), false);
         m_shooter.setSpeedDistance(m_vision.getDistance());
         m_convoyeur.stop();
         
@@ -60,7 +60,7 @@ public class ShooterSequence extends CommandBase {
       break;
 
       case feed:
-        m_turret.aim(m_vision.getTv(), m_vision.getTx());
+        m_turret.aim(m_vision.getTv(), m_vision.getTx(), false);
         m_shooter.setSpeedDistance(m_vision.getDistance());
         m_convoyeur.feed();
 

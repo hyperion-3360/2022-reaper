@@ -101,7 +101,7 @@ public class RobotContainer {
   m_autoChooser.addOption(
     "1 Ball Steal",
     new AutonomousStealOne(m_intake, m_convoyeur, m_drivetrain, m_shooter, m_turret, m_vision));
-  m_autoChooser.addOption("5 Balls", getAutonomousCommand5Balls());
+  //m_autoChooser.addOption("5 Balls", getAutonomousCommand5Balls());
   
   // Put the chooser on the dashboard
   autoChooserList = Shuffleboard
