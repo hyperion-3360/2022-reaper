@@ -42,9 +42,9 @@ public class Turret extends SubsystemBase {
   private ColorSensorV3 colorSensor; //the color sensor
 
   private double angleTolerance = 10; //
-  private double scanSpeed = 0.75; //speed at which the scan is performed
+  private double scanSpeed = 0.55; //speed at which the scan is performed
   private double rotationSpeed = 0; 
-  private double maxTurretPercent = 0.55; //max rotation speed of the motor: 0.75 = 75%
+  private double maxTurretPercent = 0.35; //max rotation speed of the motor: 0.75 = 75%
 
   private Alliance alliance;
   private double redThreshold = 0.2;

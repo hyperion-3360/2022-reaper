@@ -26,7 +26,7 @@ public class Shooter extends SubsystemBase {
   public double dashRPM, kP, kI, kD, kIz, kFF, kS, kMaxOutput, kMinOutput, maxRPM, lastSetpoint, vNom;
 
   private final double kDst2RPM_m = 11;
-  private final double kDst2RPM_b = 1760;
+  private final double kDst2RPM_b = 1800;
 
   private final NetworkTableEntry m_entryShooterRPM;
   private final NetworkTableEntry m_entryShooterRPMcmd;
