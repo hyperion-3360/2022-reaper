@@ -51,6 +51,7 @@ public class Turret extends SubsystemBase {
   private double blueThreshold = 0.2;
 
   private final NetworkTableEntry m_turretAngle;
+  private final NetworkTableEntry m_turretOffAxis;
 
   /** Creates a new Turret. */
   public Turret() {
@@ -66,12 +67,14 @@ public class Turret extends SubsystemBase {
     alliance = DriverStation.getAlliance();
 
     m_turretAngle = Shuffleboard.getTab("Debug").add("Turrent Angle", 0.0).getEntry();
+    m_turretOffAxis = Shuffleboard.getTab("Debug").add("Turrent Off Axis", 0.0).getEntry();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     m_turretAngle.setDouble(turretTurner.getEncoder().getPosition());
+    m_turretOffAxis.setDouble(getAngleFromSide());
   }
 
   public boolean minAngleReached(){

@@ -23,21 +23,22 @@ public class Vision extends SubsystemBase {
   private Solenoid statusLight;
   private NetworkTableEntry distanceCalculated;
   private NetworkTableEntry shooterAligned;
+
   public Vision() {
-  //statusLight = new Solenoid(20, ModuleType.kCTRE, );
-  distanceCalculated= Shuffleboard
+    //statusLight = new Solenoid(20, ModuleType.kCTRE, );
+    distanceCalculated= Shuffleboard
       .getTab("Pilot View")
       .add("LL distance", 0)
       .getEntry();
-  
-  shooterAligned = Shuffleboard
+
+    shooterAligned = Shuffleboard
       .getTab("Pilot View")
       .add("turret aligned", false)
       .getEntry();
 
-      
-      CameraServer.startAutomaticCapture();
-      
+    var usbCam = CameraServer.startAutomaticCapture();
+    usbCam.setFPS(20);
+    usbCam.setResolution(176, 144);
   }
 
   @Override
