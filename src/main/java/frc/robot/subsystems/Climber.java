@@ -99,8 +99,8 @@ public class Climber extends SubsystemBase {
     // This method will be called once per scheduler run
     winchPos.setDouble(getWinchPosition());
 
-    leftHook.setBoolean(switchL.get());
-    rightHook.setBoolean(switchR.get());
+    leftHook.setBoolean(!switchL.get());
+    rightHook.setBoolean(!switchR.get());
   }
 
   public void releaseClimb(){
@@ -132,8 +132,6 @@ public class Climber extends SubsystemBase {
   //controls the arms with a specified rotation in the sequence
   public void winch(double rotationSpeed){
     climberL.set(ControlMode.PercentOutput, rotationSpeed);
-    leftHook.setBoolean(switchL.get());
-    rightHook.setBoolean(switchR.get());
   }
   public void climb(){
     if (!isAtMinWinch()) climberL.set(ControlMode.PercentOutput, -Math.abs(RobotContainer.getCopilotJoystick().getRawAxis(1)));
