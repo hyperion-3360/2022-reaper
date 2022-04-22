@@ -43,11 +43,11 @@ public class AutonomousStealOne extends SequentialCommandGroup {
       Trajectory getFirstOppBall = TrajectoryGenerator.generateTrajectory(
         new Pose2d(0,-0.5,new Rotation2d(Math.toRadians(-10))),
         List.of(),
-        new Pose2d(1.25, -1.65,new Rotation2d(Math.toRadians(-20))),
+        new Pose2d(1.39, -1.51,new Rotation2d(Math.toRadians(-20))),
         Constants.autoConfigSlowForward);
 
       Trajectory goHangar = TrajectoryGenerator.generateTrajectory(
-        new Pose2d(1.25, -1.65, new Rotation2d(Math.toRadians(-20))), 
+        new Pose2d(1.39, -1.51, new Rotation2d(Math.toRadians(-20))), 
         List.of(),
         new Pose2d(3.5, 0.5, new Rotation2d(Math.toRadians(30))),
         Constants.autoConfigFastForward);
