@@ -278,12 +278,12 @@ public class RobotContainer {
       TrajectoryGenerator.generateTrajectory(
         new Pose2d(1.5,0.2,new Rotation2d(Math.toRadians(10))),
         List.of(),
-        new Pose2d(5, -0.70,new Rotation2d(Math.toRadians(30))),
+        new Pose2d(5.3, -0.90,new Rotation2d(Math.toRadians(30))),
         Constants.autoConfigSlowForward);
 
     Trajectory goShoot =
       TrajectoryGenerator.generateTrajectory(
-        new Pose2d(5,-0.70, new Rotation2d(Math.toRadians(30))),
+        new Pose2d(5.3,-0.90, new Rotation2d(Math.toRadians(30))),
         List.of(),
         new Pose2d(1.5,0,new Rotation2d(Math.toRadians(-10))),
         Constants.autoConfigSlowReverse);
