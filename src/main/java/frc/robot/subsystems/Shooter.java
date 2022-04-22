@@ -101,7 +101,7 @@ public class Shooter extends SubsystemBase {
     lastSetpoint = d_speed;
     d_speed = Math.abs(d_speed);
 
-    d_speed = d_speed - (offsetFromSide / 28.8) * 100;
+    d_speed = d_speed - (offsetFromSide / 28.8) * 130;
     setSpeed(d_speed);
   }
 

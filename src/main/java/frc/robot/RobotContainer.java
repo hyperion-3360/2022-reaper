@@ -505,12 +505,12 @@ public class RobotContainer {
       TrajectoryGenerator.generateTrajectory(
         new Pose2d(0,-0.5,new Rotation2d(Math.toRadians(-10))),
         List.of(),
-        new Pose2d(1.0, -1.4, new Rotation2d(Math.toRadians(-20))),
+        new Pose2d(1.25, -1.65, new Rotation2d(Math.toRadians(-20))),
         Constants.autoConfigFastForward);
 
     Trajectory getSecondOppBall =
       TrajectoryGenerator.generateTrajectory(
-        new Pose2d(1.0,-1.4, new Rotation2d(Math.toRadians(-20))),
+        new Pose2d(1.25,-1.65, new Rotation2d(Math.toRadians(-20))),
         List.of(),
         new Pose2d(-0.35,2.7,new Rotation2d(Math.toRadians(145))),
         Constants.autoConfigFastForward);
