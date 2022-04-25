@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.Autonomous2Balls;
 import frc.robot.commands.AutonomousStealOne;
+import frc.robot.commands.AutonomousYeet;
 import frc.robot.commands.CustomRamsete;
 import frc.robot.commands.GetShooterReady;
 import frc.robot.commands.TeleopDriveArcade;
@@ -101,7 +102,10 @@ public class RobotContainer {
   m_autoChooser.addOption(
     "1 Ball Steal",
     new AutonomousStealOne(m_intake, m_convoyeur, m_drivetrain, m_shooter, m_turret, m_vision));
-  //m_autoChooser.addOption("5 Balls", getAutonomousCommand5Balls());
+
+  m_autoChooser.addOption(
+    "Playoffs Yeet",
+    new AutonomousYeet(m_intake, m_convoyeur, m_drivetrain, m_shooter, m_turret, m_vision));
   
   // Put the chooser on the dashboard
   autoChooserList = Shuffleboard
