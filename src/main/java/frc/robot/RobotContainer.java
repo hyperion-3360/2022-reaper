@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.Autonomous2Balls;
 import frc.robot.commands.AutonomousStealOne;
@@ -56,7 +56,7 @@ import frc.robot.subsystems.Vision;
 public class RobotContainer {
 
   private static Joystick m_pilotJoystick;
-  private static Joystick m_copilotJoystick;
+  private static XboxController m_copilotJoystick;
 
   private final DriveTrain m_drivetrain;
   private final Intake m_intake;
@@ -84,7 +84,7 @@ public class RobotContainer {
     m_leds = new Leds();
 
     m_pilotJoystick = new Joystick(0);
-    m_copilotJoystick = new Joystick(1);
+    m_copilotJoystick = new XboxController(1);
 
     //configureDefaultCommands();
     configureButtonBindings();
@@ -165,11 +165,22 @@ public class RobotContainer {
       .whileHeld(new StartEndCommand(m_intake::runReversed, m_intake::stop, m_convoyeur))
       .whenPressed(new InstantCommand(m_intake::releaseIntake));
 
+    // Auto aim no pre-spin
     new JoystickButton(m_copilotJoystick, XboxController.Button.kY.value)
     .whileHeld(new AutoAlign(m_turret, m_vision));
 
+    // Auto aim with speed from distance
     new JoystickButton(m_copilotJoystick, XboxController.Button.kLeftBumper.value)
     .whileHeld(new GetShooterReady(m_shooter, m_turret, m_vision));
+
+    // Low speed shooter pre-spin
+    new Trigger(() -> {
+      return m_copilotJoystick.getLeftTriggerAxis() > 0.5;
+    }).whenActive(new RunCommand(() -> {
+      m_shooter.setSpeed(1425);
+    }, m_shooter)).whenInactive(new InstantCommand(() -> {
+      m_shooter.stop();
+    }, m_shooter));
 
     new JoystickButton(m_copilotJoystick, XboxController.Button.kRightBumper.value)
       .whileHeld(new StartEndCommand(m_convoyeur::feed, m_convoyeur::stop, m_convoyeur));
@@ -212,17 +223,6 @@ public class RobotContainer {
     //return getAutonomousCommand4Balls();
   }
 
-  /*
-  public Command cmd1(){
-    return new PrintCommand("cmd1");
-  }
-  public Command cmd2(){
-    return new PrintCommand("cmd2");
-  }
-  public Command cmd3(){
-    return new PrintCommand("cmd3");
-  }
-  */
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
@@ -567,7 +567,7 @@ public class RobotContainer {
   public static Joystick getPilotJoystick(){
     return m_pilotJoystick;
   }
-  public static Joystick getCopilotJoystick(){
+  public static XboxController getCopilotJoystick(){
     return m_copilotJoystick;
   }
 }
